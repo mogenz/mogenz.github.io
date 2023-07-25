@@ -77,6 +77,7 @@ function displayFlashcard() {
 
     document.getElementById("question").textContent = flashcards[currentIndex].question;
     document.getElementById("answer").textContent = flashcards[currentIndex].answer;
+    updateCounter();
 }
 
 function nextFlashcard() {
@@ -108,3 +109,12 @@ function addFlashcard() {
     document.getElementById("newAnswer").value = "";
     displayFlashcard();
 }
+
+function updateCounter() {
+    if (flashcards.length > 0) {
+        document.getElementById("counter").textContent = (currentIndex + 1) + " out of " + flashcards.length;
+    } else {
+        document.getElementById("counter").textContent = "";
+    }
+}
+
