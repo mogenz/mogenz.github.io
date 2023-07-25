@@ -48,8 +48,21 @@ let flashcards = JSON.parse(localStorage.getItem('flashcards')) || [
         {question: "What is an inconsistent system of equations?", answer: "An inconsistent system of equations is a system that has no solution."},
         {question: "What is an underdetermined system of equations?", answer: "An underdetermined system of equations is a system where the number of equations is less than the number of variables."},
         {question: "What is an overdetermined system of equations?", answer: "An overdetermined system of equations is a system where the number of equations is greater than the number of variables."},
+        {question: "What is cubic spline interpolation?", answer: "Cubic spline interpolation is a method of curve fitting where a number of piece-wise third-degree polynomials are fit to a data set, such that each polynomial 'piece' connects two data points and the combined curve is smooth."},
+        {question: "What are the properties of a cubic spline?", answer: "A cubic spline is continuous, its first and second derivatives are also continuous, and it is a piece-wise cubic function between each pair of consecutive nodes."},
+        {question: "Why is cubic spline interpolation preferred over other interpolation methods?", answer: "Cubic spline interpolation is preferred as it provides a smooth curve that fits the data points and has nice mathematical properties, while also avoiding problems such as Runge's phenomenon which can occur with polynomial interpolation."},
+        {question: "Explain the process of creating a cubic spline interpolation.", answer: "Cubic spline interpolation involves: 1) dividing the data into intervals, 2) fitting a cubic polynomial to each interval, 3) ensuring that the fitted polynomials meet at the data points, and 4) adjusting the polynomials so that their first and second derivatives are the same at these meeting points, ensuring smooth transitions."},
+        {question: "What is a stochastic variable?", answer: "A stochastic variable, also known as a random variable, is a variable whose possible values depend on the outcomes of a certain random phenomenon."},
+        {question: "What is the difference between a stochastic variable and a deterministic variable?", answer: "A deterministic variable has a value that is precisely determined through known relationships or functions, while the value of a stochastic variable is subject to randomness and can be described only in terms of probability distributions."},
+        {question: "What is a Markov chain?", answer: "A Markov chain is a stochastic model describing a sequence of possible events in which the probability of each event depends only on the state attained in the previous event."},
+        {question: "What are the properties of Markov chains?", answer: "The key property of a Markov chain is the 'memoryless' property or Markov property, which means that the future state depends only on the present state and not on the sequence of events that preceded it."},
+        {question: "What is the method of least squares?", answer: "The method of least squares is a standard approach in regression analysis to approximate the solution of overdetermined systems by minimizing the sum of the squares of the residuals made in the results of every single equation."},
+        {question: "Why is the least squares method used?", answer: "The least squares method is used to find the best-fitting curve to a given set of points by minimizing the sum of the squares of the offsets or the residuals of points from the plotted curve."},
+        {question: "What is a polynomial?", answer: "A polynomial is an expression consisting of variables and coefficients, that involves only the operations of addition, subtraction, multiplication, and non-negative integer exponents of variables."},
+        {question: "What is the degree of a polynomial?", answer: "The degree of a polynomial is the highest power of its variable."},
+        {question: "What is a root of a polynomial?", answer: "A root of a polynomial is a value of the variable that makes the polynomial equal to zero."},
     ];
-    
+
 let currentIndex = 0;
 
 window.onload = function() {
