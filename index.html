@@ -2,21 +2,23 @@
 <html>
 <head>
 	<title>Flashcard - SLIAL</title>
-	<script src="script.js"></script>
 	<link rel="stylesheet" href="styles.css">
 </head>
 <body>
 	<h1>Flashcard App</h1>
 	<div id="flashcard">
 		<p id="question"></p>
-		<p id="answer"></p>
+		<p id="answer" style="display: none;"></p>
 	</div>
+	<button onclick="previousFlashcard()">Previous</button>
 	<button onclick="nextFlashcard()">Next</button>
 	<button onclick="revealAnswer()">Reveal Answer</button>
+	<button onclick="hideAnswer()">Hide Answer</button>
 	<form id="addFlashcardForm" onsubmit="addFlashcard(); return false;">
 		<input type="text" id="newQuestion" placeholder="New question">
 		<input type="text" id="newAnswer" placeholder="New answer">
 		<input type="submit" value="Add Flashcard">
 	</form>
+	<script src="script.js"></script>
 </body>
 </html>
