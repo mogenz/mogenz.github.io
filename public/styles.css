@@ -1,0 +1,17 @@
+#flashcard {
+	margin: 20px 0;
+	padding: 10px;
+	border: 1px solid black;
+}
+
+#addFlashcardForm {
+	margin: 20px 0;
+}
+
+input[type=text] {
+	margin: 0 10px 0 0;
+}
+
+button, input[type=submit] {
+	margin: 0 10px 0 0;
+}
