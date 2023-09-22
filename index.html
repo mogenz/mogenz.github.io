@@ -1,25 +1,40 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-	<title>Flashcard - SLIAL</title>
-	<link rel="stylesheet" href="styles.css">
+    <meta charset="UTF-8">
+    <title>Yarn Color Combinations</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-	<h1>Flashcard App</h1>
-	<div id="flashcard">
-		<p id="question"></p>
-		<p id="answer" style="display: none;"></p>
-	</div>
-	<button onclick="previousFlashcard()">Previous</button>
-	<button onclick="nextFlashcard()">Next</button>
-	<button onclick="revealAnswer()">Reveal Answer</button>
-	<button onclick="hideAnswer()">Hide Answer</button>
-    <p id="counter"></p>
-	<form id="addFlashcardForm" onsubmit="addFlashcard(); return false;">
-		<input type="text" id="newQuestion" placeholder="New question">
-		<input type="text" id="newAnswer" placeholder="New answer">
-		<input type="submit" value="Add Flashcard">
-	</form>
-	<script src="script.js"></script>
+<div id="wrapper">
+    <header>
+        <h1>Garn kombinationer <3</h1>
+    </header>
+
+    <section id="owned-yarns-section">
+        <h2>- Mit Garn -</h2>
+        <div id="owned-yarns">
+            <!-- Owned Yarn Colors Will Appear Here -->
+        </div>
+        <label for="new-color">Tilføj ny garn farve:  </label>
+        <input type="text" id="new-color" placeholder="#FFFFFF or 'red'">
+        <button onclick="addNewColor()">Tilføj</button>
+    </section>
+
+    <section id="combination-controls">
+        <button onclick="addExistingCombination()">Tilføj eksisterende kombination</button>
+        <button onclick="generateCombination()">Generer tilfældig kombination</button>
+        <label for="combo-size">Kombination størrelse: </label>
+        <input type="number" id="combo-size" min="2" value="5">
+    </section>
+
+    <section id="combinations-section">
+        <h2>Kombinationer</h2>
+        <div id="combinations">
+            <!-- Combinations Will Appear Here -->
+        </div>
+    </section>
+</div>
+<script src="script.js"></script>
 </body>
 </html>
