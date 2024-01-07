@@ -1,3 +1,3 @@
 # mogenz.github.io
 
-This is a Flashcard Project
+Personal website for whatever
