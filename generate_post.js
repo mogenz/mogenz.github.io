@@ -1,25 +1,21 @@
 // generate_post.js
 
-const fs = require('fs');
-const path = require('path');
-const { OpenAI } = require('openai');
-const { Configuration } = require('openai');
+import fs from 'fs';
+import path from 'path';
+import OpenAI from 'openai';
 
+// Initialize OpenAI API
+const openai = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+});
 
 (async () => {
     try {
-        // Check if API key is provided
         if (!process.env.OPENAI_API_KEY) {
             throw new Error('OPENAI_API_KEY is not set. Please add it to your GitHub Secrets.');
         }
 
-        // Initialize OpenAI API
-        const configuration = new OpenAI({
-            apiKey: process.env.OPENAI_API_KEY,
-        });
-        const openai = new OpenAI(configuration);
-
-        // Generate a blog post title and content
+        // Prepare the prompt
         const prompt = `
 You are an AI language model that writes insightful and engaging blog posts about Artificial Intelligence. Generate a blog post with the following structure:
 
@@ -34,22 +30,21 @@ Content:
 
 Date:
 [Current date in YYYY-MM-DD format]
-`;
+        `;
 
-        const response = await openai.createCompletion({
-            model: 'text-davinci-003',
-            prompt: prompt,
+        // Generate the blog post using OpenAI's chat completion
+        const chatCompletion = await openai.chat.completions.create({
+            messages: [{ role: "user", content: prompt }],
+            model: "gpt-4", // Use "gpt-4" or "gpt-3.5-turbo"
             max_tokens: 1500,
             temperature: 0.7,
-            n: 1,
-            stop: null,
         });
 
-        if (!response.data || !response.data.choices || response.data.choices.length === 0) {
+        if (!chatCompletion.choices || chatCompletion.choices.length === 0) {
             throw new Error('No response from OpenAI API.');
         }
 
-        const text = response.data.choices[0].text.trim();
+        const text = chatCompletion.choices[0].message.content.trim();
 
         // Parse the generated text into a JSON object
         const post = parseGeneratedText(text);
@@ -59,7 +54,7 @@ Date:
             post.id = generateUniqueId();
 
             // Save the post as a JSON file
-            const filePath = path.join(__dirname, 'posts', `post${post.id}.json`);
+            const filePath = path.join('posts', `post${post.id}.json`);
             fs.writeFileSync(filePath, JSON.stringify(post, null, 4));
 
             // Update posts.json
@@ -105,7 +100,7 @@ function generateUniqueId() {
 }
 
 function updatePostsJson(newPost) {
-    const postsFilePath = path.join(__dirname, 'posts', 'posts.json');
+    const postsFilePath = path.join('posts', 'posts.json');
     let posts = [];
 
     if (fs.existsSync(postsFilePath)) {
