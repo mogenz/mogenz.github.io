@@ -2,8 +2,12 @@
 
 const fs = require('fs');
 const path = require('path');
-const { Configuration, OpenAIApi } = require('openai');
+const { OpenAI } = require('openai');
+const { Configuration } = require('openai');
 
+
+// Ensure correct usage as a constructor
+const config = new Configuration(options);
 (async () => {
     try {
         // Check if API key is provided
@@ -15,7 +19,7 @@ const { Configuration, OpenAIApi } = require('openai');
         const configuration = new Configuration({
             apiKey: process.env.OPENAI_API_KEY,
         });
-        const openai = new OpenAIApi(configuration);
+        const openai = new OpenAI(configuration);
 
         // Generate a blog post title and content
         const prompt = `
