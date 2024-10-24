@@ -6,8 +6,6 @@ const { OpenAI } = require('openai');
 const { Configuration } = require('openai');
 
 
-// Ensure correct usage as a constructor
-const config = new Configuration(options);
 (async () => {
     try {
         // Check if API key is provided
@@ -16,7 +14,7 @@ const config = new Configuration(options);
         }
 
         // Initialize OpenAI API
-        const configuration = new Configuration({
+        const configuration = new OpenAI({
             apiKey: process.env.OPENAI_API_KEY,
         });
         const openai = new OpenAI(configuration);
