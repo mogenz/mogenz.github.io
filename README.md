@@ -1,3 +1,3 @@
 # mogenz.github.io
 
-Personal website for whatever
+a for fun test website :D 
