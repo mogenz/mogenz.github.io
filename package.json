@@ -1,6 +1,7 @@
 {
   "name": "mogenz.github.io",
   "version": "1.0.0",
+  "type": "module",
   "description": "a for fun test website :D",
   "main": "generate_post.js",
   "scripts": {
@@ -8,6 +9,7 @@
   },
   "author": "",
   "license": "ISC",
+  
   "dependencies": {
     "openai": "^4.68.4"
   }

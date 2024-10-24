@@ -1,8 +1,6 @@
-// generate_post.js
-
 import fs from 'fs';
 import path from 'path';
-import OpenAI from 'openai';
+import { OpenAI } from 'openai';
 
 // Initialize OpenAI API
 const openai = new OpenAI({
@@ -12,7 +10,7 @@ const openai = new OpenAI({
 (async () => {
     try {
         if (!process.env.OPENAI_API_KEY) {
-            throw new Error('OPENAI_API_KEY is not set. Please add it to your GitHub Secrets.');
+            throw new Error('OPENAI_API_KEY is not set. Please add it to your environment variables.');
         }
 
         // Prepare the prompt
@@ -34,7 +32,7 @@ Date:
 
         // Generate the blog post using OpenAI's chat completion
         const chatCompletion = await openai.chat.completions.create({
-            messages: [{ role: "user", content: prompt }],
+            messages: [{ role: "system", content: prompt }],
             model: "gpt-4", // Use "gpt-4" or "gpt-3.5-turbo"
             max_tokens: 1500,
             temperature: 0.7,
