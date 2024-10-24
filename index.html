@@ -2,47 +2,53 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Yarn Color Combinations</title>
+    <title>My AI Blog</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<div id="wrapper">
+    <!-- Header -->
     <header>
-        <h1>Garn kombinationer <3</h1>
-    </header>
-    <header>
-        <h3>#a3c5a1 dusty green | 
-            #FF10F0 neon pink | 
-            #00af9d pool green | 
-            #5F021F bordeaux | 
-            #aaf0d1 mint | 
-        </h3>
+        <h1 class="title">My AI Blog</h1>
+        <nav class="menu">
+            <input type="checkbox" id="menu-toggle">
+            <label for="menu-toggle" class="menu-icon">&#9776;</label>
+            <ul class="menu-list">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="about.html">About</a></li>
+            </ul>
+        </nav>
     </header>
 
-    <section id="owned-yarns-section">
-        <h2>- Mit Garn -</h2>
-        <div id="owned-yarns">
-            <!-- Owned Yarn Colors Will Appear Here -->
-        </div>
-        <label for="new-color">Tilføj ny garn farve:  </label>
-        <input type="text" id="new-color" placeholder="#FFFFFF or 'red'">
-        <button onclick="addNewColor()">Tilføj</button>
+    <!-- Latest Post -->
+    <section class="latest-post">
+        <h2 id="latest-post-title">Latest Post Title</h2>
+        <p id="latest-post-description">This is a short description of the latest blog post.</p>
     </section>
 
-    <section id="combination-controls">
-        <button onclick="addExistingCombination()">Tilføj eksisterende kombination</button>
-        <button onclick="generateCombination()">Generer tilfældig kombination</button>
-        <label for="combo-size">Kombination størrelse: </label>
-        <input type="number" id="combo-size" min="2" value="5">
-    </section>
-
-    <section id="combinations-section">
-        <h2>Kombinationer</h2>
-        <div id="combinations">
-            <!-- Combinations Will Appear Here -->
+    <!-- Grid View of Latest Posts -->
+    <section class="post-grid">
+        <h2>Recent Posts</h2>
+        <div class="grid-container" id="grid-container">
+            <!-- Grid items will be inserted here by script.js -->
         </div>
     </section>
-</div>
-<script src="script.js"></script>
+
+    <!-- Search and Post List -->
+    <section class="post-list-section">
+        <input type="text" id="search-bar" placeholder="Search posts...">
+        <ul id="post-list">
+            <!-- Post list items will be inserted here by script.js -->
+        </ul>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2023 My AI Blog</p>
+        <div class="footer-links">
+            <a href="index.html">Home</a> | <a href="about.html">About</a>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
 </body>
 </html>
