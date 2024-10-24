@@ -6,6 +6,11 @@ const { Configuration, OpenAIApi } = require('openai');
 
 (async () => {
     try {
+        // Check if API key is provided
+        if (!process.env.OPENAI_API_KEY) {
+            throw new Error('OPENAI_API_KEY is not set. Please add it to your GitHub Secrets.');
+        }
+
         // Initialize OpenAI API
         const configuration = new Configuration({
             apiKey: process.env.OPENAI_API_KEY,
@@ -14,27 +19,33 @@ const { Configuration, OpenAIApi } = require('openai');
 
         // Generate a blog post title and content
         const prompt = `
-        You are an AI language model that writes insightful and engaging blog posts about Artificial Intelligence. Generate a blog post with the following structure:
+You are an AI language model that writes insightful and engaging blog posts about Artificial Intelligence. Generate a blog post with the following structure:
 
-        Title:
-        [A catchy and descriptive title about a topic in AI]
+Title:
+[A catchy and descriptive title about a topic in AI]
 
-        Description:
-        [A short summary of the blog post]
+Description:
+[A short summary of the blog post]
 
-        Content:
-        [Detailed content of the blog post, including an introduction, main sections, and conclusion. Use appropriate HTML tags like <h2>, <p>, <ul>, <li>, etc.]
+Content:
+[Detailed content of the blog post, including an introduction, main sections, and conclusion. Use appropriate HTML tags like <h2>, <p>, <ul>, <li>, etc.]
 
-        Date:
-        [Current date in YYYY-MM-DD format]
-        `;
+Date:
+[Current date in YYYY-MM-DD format]
+`;
 
         const response = await openai.createCompletion({
-            model: 'gpt-4o-mini',
+            model: 'text-davinci-003',
             prompt: prompt,
             max_tokens: 1500,
             temperature: 0.7,
+            n: 1,
+            stop: null,
         });
+
+        if (!response.data || !response.data.choices || response.data.choices.length === 0) {
+            throw new Error('No response from OpenAI API.');
+        }
 
         const text = response.data.choices[0].text.trim();
 
@@ -54,10 +65,10 @@ const { Configuration, OpenAIApi } = require('openai');
 
             console.log('New blog post generated successfully.');
         } else {
-            console.error('Failed to parse the generated post.');
+            throw new Error('Failed to parse the generated post.');
         }
     } catch (error) {
-        console.error('Error generating blog post:', error);
+        console.error('Error generating blog post:', error.message);
         process.exit(1);
     }
 })();
@@ -65,6 +76,7 @@ const { Configuration, OpenAIApi } = require('openai');
 function parseGeneratedText(text) {
     const lines = text.split('\n').filter(line => line.trim() !== '');
     const post = {};
+    let contentStarted = false;
 
     lines.forEach(line => {
         if (line.startsWith('Title:')) {
@@ -72,11 +84,12 @@ function parseGeneratedText(text) {
         } else if (line.startsWith('Description:')) {
             post.description = line.replace('Description:', '').trim();
         } else if (line.startsWith('Content:')) {
+            contentStarted = true;
             post.content = line.replace('Content:', '').trim();
         } else if (line.startsWith('Date:')) {
             post.date = line.replace('Date:', '').trim();
         } else {
-            if (post.content) {
+            if (contentStarted) {
                 post.content += '\n' + line;
             }
         }
