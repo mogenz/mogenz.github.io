@@ -8,14 +8,18 @@
 <body class="post">
     <!-- Header -->
     <header>
-        <h1 class="title"><a href="index.html">My AI Blog</a></h1>
+        <div class="logo">
+            <a href="index.html">My AI Blog</a>
+        </div>
         <nav class="menu">
             <input type="checkbox" id="menu-toggle">
             <label for="menu-toggle" class="menu-icon">&#9776;</label>
-            <ul class="menu-list">
-                <li><a href="index.html">Home</a></li>
-                <li><a href="about.html">About</a></li>
-            </ul>
+            <div class="slideout-menu" id="slideout-menu">
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="about.html">About</a></li>
+                </ul>
+            </div>
         </nav>
     </header>
 
@@ -26,16 +30,26 @@
 
     <!-- Blog Post Content -->
     <section class="blog-post">
-        <h2 id="post-title"></h2>
-        <p id="post-date"></p>
-        <div id="post-content"></div>
+        <div class="container">
+            <h2 id="post-title"></h2>
+            <p id="post-date"></p>
+            <div id="post-content"></div>
+        </div>
     </section>
+
+    <!-- Back to Top Button -->
+    <button id="back-to-top" title="Back to Top">&#8679;</button>
 
     <!-- Footer -->
     <footer>
         <p>&copy; 2023 My AI Blog</p>
         <div class="footer-links">
             <a href="index.html">Home</a> | <a href="about.html">About</a>
+        </div>
+        <div class="social-media">
+            <a href="#" aria-label="Facebook"><img src="icons/facebook.svg" alt="Facebook"></a>
+            <a href="#" aria-label="Twitter"><img src="icons/twitter.svg" alt="Twitter"></a>
+            <a href="#" aria-label="Instagram"><img src="icons/instagram.svg" alt="Instagram"></a>
         </div>
     </footer>
 
