@@ -1,26 +1,11 @@
 // script.js
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Function to display latest post
-    function displayLatestPost() {
-        if (typeof blogPosts === 'undefined' || blogPosts.length === 0) return;
-        const latestPost = blogPosts[0]; // Assuming the first post is the latest
-
-        const latestPostTitle = document.getElementById('latest-post-title');
-        const latestPostDescription = document.getElementById('latest-post-description');
-
-        latestPostTitle.textContent = latestPost.title;
-        latestPostTitle.href = `post.html?postId=${latestPost.id}`;
-
-        latestPostDescription.textContent = latestPost.description;
-        latestPostDescription.href = `post.html?postId=${latestPost.id}`;
-    }
-
     // Function to display grid view of posts
     function displayPostGrid() {
         const gridContainer = document.getElementById('grid-container');
         if (!gridContainer || typeof blogPosts === 'undefined') return;
-        blogPosts.slice(1, 4).forEach(post => { // Show next three posts
+        blogPosts.forEach(post => {
             const gridItem = document.createElement('div');
             gridItem.className = 'grid-item';
             gridItem.innerHTML = `
@@ -107,7 +92,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Initialize functions based on page
     if (document.body.classList.contains('home')) {
-        displayLatestPost();
         displayPostGrid();
         displayPostList();
     } else if (document.body.classList.contains('post')) {
