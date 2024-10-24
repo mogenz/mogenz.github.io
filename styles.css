@@ -120,13 +120,15 @@ header {
 }
 
 .hero h1 {
-    font-size: 48px;
+    font-size: 72px;
     margin-bottom: 20px;
+    text-align: center;
 }
 
 .hero p {
-    font-size: 24px;
+    font-size: 32px;
     margin-bottom: 0;
+    text-align: center;
 }
 
 @media (max-width: 767px) {
