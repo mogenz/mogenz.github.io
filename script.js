@@ -6,16 +6,14 @@ document.addEventListener('DOMContentLoaded', function() {
         if (typeof blogPosts === 'undefined' || blogPosts.length === 0) return;
         const latestPost = blogPosts[0]; // Assuming the first post is the latest
 
-        document.getElementById('latest-post-title').textContent = latestPost.title;
-        document.getElementById('latest-post-description').textContent = latestPost.description;
+        const latestPostTitle = document.getElementById('latest-post-title');
+        const latestPostDescription = document.getElementById('latest-post-description');
 
-        // Make the latest post title and description clickable
-        document.getElementById('latest-post-title').addEventListener('click', () => {
-            window.location.href = `post.html?postId=${latestPost.id}`;
-        });
-        document.getElementById('latest-post-description').addEventListener('click', () => {
-            window.location.href = `post.html?postId=${latestPost.id}`;
-        });
+        latestPostTitle.textContent = latestPost.title;
+        latestPostTitle.href = `post.html?postId=${latestPost.id}`;
+
+        latestPostDescription.textContent = latestPost.description;
+        latestPostDescription.href = `post.html?postId=${latestPost.id}`;
     }
 
     // Function to display grid view of posts
@@ -86,6 +84,25 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('post-title').textContent = "Post Not Found";
             document.getElementById('post-content').textContent = "The blog post you are looking for does not exist.";
         }
+    }
+
+    // Back to Top Button functionality
+    const backToTopButton = document.getElementById('back-to-top');
+    if (backToTopButton) {
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 300) {
+                backToTopButton.style.display = 'block';
+            } else {
+                backToTopButton.style.display = 'none';
+            }
+        });
+
+        backToTopButton.addEventListener('click', () => {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
     }
 
     // Initialize functions based on page
