@@ -1,0 +1,14 @@
+{
+  "name": "mogenz.github.io",
+  "version": "1.0.0",
+  "description": "a for fun test website :D",
+  "main": "generate_post.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "openai": "^4.68.4"
+  }
+}
