@@ -4,8 +4,8 @@ let blogPosts = [];
 let countdownEndTime = null;
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Fetch posts and countdown, then initialize the page
-    Promise.all([fetchPosts(), fetchCountdown()]).then(() => {
+    // Fetch posts and then initialize the page
+    fetchPosts().then(() => {
         if (document.body.classList.contains('home')) {
             displayPostGrid();
             displayPostList();
@@ -79,46 +79,53 @@ async function fetchPosts() {
     }
 }
 
-// Function to fetch countdown data
-async function fetchCountdown() {
-    try {
-        const response = await fetch('countdown.json');
-        const data = await response.json();
-        countdownEndTime = data.endTime;
-    } catch (error) {
-        console.error('Error fetching countdown:', error);
-    }
-}
-
-// Modify the initializeCountdown function
 function initializeCountdown() {
     const countdownElement = document.getElementById('countdown-timer');
     const redirectButton = document.getElementById('redirect-button');
 
-    // Check if countdownEndTime is valid
-    if (!countdownEndTime || new Date(countdownEndTime) < new Date()) {
-        // Set new countdown end time 72 hours from now
-        countdownEndTime = new Date(Date.now() + 72 * 60 * 60 * 1000).toISOString();
-    }
+    const now = Date.now();
+    const startTime = new Date('2023-01-01T00:00:00Z').getTime(); // Fixed start time
+    const period = 72 * 60 * 60 * 1000; // 72 hours in milliseconds
+
+    // Calculate the number of periods since the start time
+    const periodsSinceStart = Math.floor((now - startTime) / period);
+
+    // Calculate the next countdown end time
+    countdownEndTime = startTime + (periodsSinceStart + 1) * period;
+
+    // Start the countdown
+    updateCountdown();
 
     const countdownInterval = setInterval(() => {
+        updateCountdown();
+    }, 1000);
+
+    function updateCountdown() {
         const now = Date.now();
-        const distance = new Date(countdownEndTime).getTime() - now;
+        const distance = countdownEndTime - now;
 
         if (distance <= 0) {
-            // Reset countdown to 72 hours from now
-            countdownEndTime = new Date(Date.now() + 72 * 60 * 60 * 1000).toISOString();
-
-            // Update the display
-            updateCountdownDisplay(72 * 60 * 60 * 1000);
+            // Reset countdown to the next period
+            countdownEndTime += period;
 
             // Show the redirect button
             redirectButton.style.display = 'inline-block';
         } else {
-            // Update the display
-            updateCountdownDisplay(distance);
+            // Hide the redirect button if countdown is running
+            redirectButton.style.display = 'none';
         }
-    }, 1000);
+
+        // Update the countdown display
+        const hours = Math.floor((distance / (1000 * 60 * 60)) % 72);
+        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+        countdownElement.textContent = `
+            ${String(hours).padStart(2, '0')}:
+            ${String(minutes).padStart(2, '0')}:
+            ${String(seconds).padStart(2, '0')}
+        `.replace(/\s/g, '');
+    }
 
     redirectButton.addEventListener('click', () => {
         // Redirect to the latest blog post
@@ -129,6 +136,8 @@ function initializeCountdown() {
             window.location.href = 'index.html';
         }
     });
+}
+
 
     function updateCountdownDisplay(distance) {
         const hours = Math.floor((distance / (1000 * 60 * 60)));
