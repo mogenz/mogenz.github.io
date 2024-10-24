@@ -15,7 +15,7 @@ const openai = new OpenAI({
 
         // Prepare the prompt
         const prompt = `
-You are an AI language model that writes insightful and engaging blog posts about Artificial Intelligence. Generate a blog post with the following structure including a date at the end:
+You are an AI language model that writes insightful and engaging blog posts about anything you want. Generate a blog post with the following structure including a date at the end:
 
 Title:
 [A catchy and descriptive title about a topic in AI.]

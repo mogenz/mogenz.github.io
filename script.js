@@ -18,15 +18,17 @@ async function fetchPosts() {
     }
 }
 
-function displayPostGrid() {
+function displayPostGrid(postsToDisplay = []) {
     const gridContainer = document.getElementById('grid-container');
-    if (!gridContainer || blogPosts.length === 0) return;
+    if (!gridContainer) return;
+
+    // If no specific posts are provided, display all posts
+    if (postsToDisplay.length === 0) {
+        postsToDisplay = blogPosts;
+    }
 
     // Clear existing content
     gridContainer.innerHTML = '';
-
-    // Display the latest 6 posts (adjust as needed)
-    const postsToDisplay = blogPosts.slice(0, 6);
 
     postsToDisplay.forEach(post => {
         const gridItem = document.createElement('div');
@@ -76,16 +78,30 @@ document.addEventListener('DOMContentLoaded', function() {
     // Fetch posts and then initialize the page
     fetchPosts().then(() => {
         if (document.body.classList.contains('home')) {
-            displayPostGrid();
+            // Display only the latest posts on the homepage
+            displayPostGrid(blogPosts.slice(0, 6));
             displayPostList();
 
-            // Search functionality
+            // Search functionality for the homepage
             const searchBar = document.getElementById('search-bar');
             if (searchBar) {
                 searchBar.addEventListener('input', function(e) {
                     const searchTerm = e.target.value.toLowerCase();
                     const filteredPosts = blogPosts.filter(post => post.title.toLowerCase().includes(searchTerm));
                     displayPostList(filteredPosts);
+                });
+            }
+        } else if (document.body.classList.contains('all-posts')) {
+            // Display all posts on the All Posts page
+            displayPostGrid();
+
+            // Search functionality for the All Posts page
+            const searchBar = document.getElementById('search-bar');
+            if (searchBar) {
+                searchBar.addEventListener('input', function(e) {
+                    const searchTerm = e.target.value.toLowerCase();
+                    const filteredPosts = blogPosts.filter(post => post.title.toLowerCase().includes(searchTerm));
+                    displayPostGrid(filteredPosts);
                 });
             }
         } else if (document.body.classList.contains('post')) {
