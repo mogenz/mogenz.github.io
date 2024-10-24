@@ -97,4 +97,59 @@ document.addEventListener('DOMContentLoaded', function() {
     } else if (document.body.classList.contains('post')) {
         displayFullPost();
     }
+// Countdown Timer for countdown.html
+document.addEventListener('DOMContentLoaded', function() {
+    if (document.body.classList.contains('countdown')) {
+        initializeCountdown();
+    }
+
+    function initializeCountdown() {
+        const countdownElement = document.getElementById('countdown-timer');
+        const redirectButton = document.getElementById('redirect-button');
+
+        // Set the target date/time for the countdown (replace with your logic)
+        let countdownEndTime = localStorage.getItem('countdownEndTime');
+
+        if (!countdownEndTime || new Date(countdownEndTime) < new Date()) {
+            // Set new countdown end time 72 hours from now
+            countdownEndTime = new Date(new Date().getTime() + 72 * 60 * 60 * 1000).toISOString();
+            localStorage.setItem('countdownEndTime', countdownEndTime);
+        }
+
+        const countdownInterval = setInterval(() => {
+            const now = new Date().getTime();
+            const distance = new Date(countdownEndTime).getTime() - now;
+
+            if (distance < 0) {
+                clearInterval(countdownInterval);
+                countdownElement.textContent = "00:00:00";
+                redirectButton.style.display = 'inline-block';
+
+                // Optionally, reset the countdown
+                // countdownEndTime = new Date(new Date().getTime() + 72 * 60 * 60 * 1000).toISOString();
+                // localStorage.setItem('countdownEndTime', countdownEndTime);
+            } else {
+                const hours = Math.floor((distance / (1000 * 60 * 60)));
+                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                countdownElement.textContent = `
+                    ${String(hours).padStart(2, '0')}:
+                    ${String(minutes).padStart(2, '0')}:
+                    ${String(seconds).padStart(2, '0')}
+                `.replace(/\s/g, '');
+            }
+        }, 1000);
+
+        redirectButton.addEventListener('click', () => {
+            // Redirect to the latest blog post
+            const latestPostId = localStorage.getItem('latestPostId');
+            if (latestPostId) {
+                window.location.href = `post.html?postId=${latestPostId}`;
+            } else {
+                window.location.href = 'index.html';
+            }
+        });
+    }
 });
+
