@@ -1,9 +1,7 @@
 // script.js
 
 let blogPosts = [];
-let countdownEndTime = null;
 
-// Functions related to posts
 async function fetchPosts() {
     try {
         const response = await fetch('posts/posts.json');
@@ -74,32 +72,28 @@ function displayFullPost() {
     }
 }
 
-// DOMContentLoaded Event Listener
 document.addEventListener('DOMContentLoaded', function() {
     // Fetch posts and then initialize the page
     fetchPosts().then(() => {
         if (document.body.classList.contains('home')) {
             displayPostGrid();
             displayPostList();
+
+            // Search functionality
+            const searchBar = document.getElementById('search-bar');
+            if (searchBar) {
+                searchBar.addEventListener('input', function(e) {
+                    const searchTerm = e.target.value.toLowerCase();
+                    const filteredPosts = blogPosts.filter(post => post.title.toLowerCase().includes(searchTerm));
+                    displayPostList(filteredPosts);
+                });
+            }
         } else if (document.body.classList.contains('post')) {
             displayFullPost();
-        }
-
-        // Search functionality
-        const searchBar = document.getElementById('search-bar');
-        if (searchBar) {
-            searchBar.addEventListener('input', function(e) {
-                const searchTerm = e.target.value.toLowerCase();
-                const filteredPosts = blogPosts.filter(post => post.title.toLowerCase().includes(searchTerm));
-                displayPostList(filteredPosts);
-            });
+        } else if (document.body.classList.contains('countdown')) {
+            initializeCountdown();
         }
     });
-
-    // Countdown Timer for countdown.html
-    if (document.body.classList.contains('countdown')) {
-        initializeCountdown();
-    }
 
     // FAQ collapsible functionality
     const faqQuestions = document.querySelectorAll('.faq-question');
@@ -141,39 +135,46 @@ document.addEventListener('DOMContentLoaded', function() {
         const countdownElement = document.getElementById('countdown-timer');
         const redirectButton = document.getElementById('redirect-button');
 
-        // Set the target date/time for the countdown (replace with your logic)
-        let countdownEndTime = localStorage.getItem('countdownEndTime');
+        // Fixed start time (replace with your chosen start time in UTC)
+        const START_TIME = new Date('2023-10-01T00:00:00Z').getTime(); // Example start time
+        const PERIOD = 72 * 60 * 60 * 1000; // 72 hours in milliseconds
 
-        if (!countdownEndTime || new Date(countdownEndTime) < new Date()) {
-            // Set new countdown end time 72 hours from now
-            countdownEndTime = new Date(Date.now() + 72 * 60 * 60 * 1000).toISOString();
-            localStorage.setItem('countdownEndTime', countdownEndTime);
-        }
+        const now = Date.now();
+        const timeSinceStart = now - START_TIME;
+        const periodsSinceStart = Math.floor(timeSinceStart / PERIOD);
+        const countdownEndTime = START_TIME + (periodsSinceStart + 1) * PERIOD;
 
-        const countdownInterval = setInterval(() => {
+        updateCountdown(); // Initial call to display the countdown immediately
+
+        const countdownInterval = setInterval(updateCountdown, 1000);
+
+        function updateCountdown() {
             const now = Date.now();
-            const distance = new Date(countdownEndTime).getTime() - now;
+            const distance = countdownEndTime - now;
 
-            if (distance < 0) {
+            if (distance <= 0) {
+                // Reset countdown to the next period
                 clearInterval(countdownInterval);
-                countdownElement.textContent = "00:00:00";
+                initializeCountdown(); // Restart the countdown for the next period
+                // Show the redirect button
                 redirectButton.style.display = 'inline-block';
-
-                // Optionally, reset the countdown
-                // countdownEndTime = new Date(Date.now() + 72 * 60 * 60 * 1000).toISOString();
-                // localStorage.setItem('countdownEndTime', countdownEndTime);
             } else {
-                const hours = Math.floor((distance / (1000 * 60 * 60)));
+                // Hide the redirect button while the countdown is running
+                redirectButton.style.display = 'none';
+
+                // Calculate time components
+                const hours = Math.floor((distance / (1000 * 60 * 60)) % 72);
                 const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
                 const seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
+                // Update the countdown display
                 countdownElement.textContent = `
                     ${String(hours).padStart(2, '0')}:
                     ${String(minutes).padStart(2, '0')}:
                     ${String(seconds).padStart(2, '0')}
                 `.replace(/\s/g, '');
             }
-        }, 1000);
+        }
 
         redirectButton.addEventListener('click', () => {
             // Redirect to the latest blog post
