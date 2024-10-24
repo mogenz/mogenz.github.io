@@ -4,8 +4,8 @@ let blogPosts = [];
 let countdownEndTime = null;
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Fetch posts and then initialize the page
-    fetchPosts().then(() => {
+    // Fetch posts and countdown, then initialize the page
+    Promise.all([fetchPosts(), fetchCountdown()]).then(() => {
         if (document.body.classList.contains('home')) {
             displayPostGrid();
             displayPostList();
@@ -13,8 +13,6 @@ document.addEventListener('DOMContentLoaded', function() {
             displayFullPost();
         } else if (document.body.classList.contains('countdown')) {
             initializeCountdown();
-        } else if (document.body.classList.contains('about')) {
-            // Initialize any about page functionalities if needed
         }
     });
 
