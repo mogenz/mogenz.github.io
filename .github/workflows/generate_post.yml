@@ -26,8 +26,14 @@ jobs:
         run: |
           node generate_post.js
 
+      - name: Update Countdown Timer
+        run: |
+          node update_countdown.js
+
       - name: Commit and Push Changes
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
-          commit_message: "Add new blog post [skip ci]"
-          file_pattern: posts/*.json
+          commit_message: "Add new blog post and reset countdown [skip ci]"
+          file_pattern: |
+            posts/*.json
+            countdown.json

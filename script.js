@@ -1,20 +1,54 @@
-// Countdown Timer for countdown.html
+// script.js
+
 document.addEventListener('DOMContentLoaded', function() {
-    if (document.body.classList.contains('countdown')) {
-        initializeCountdown();
+    // Fetch posts and countdown, then initialize the page
+    Promise.all([fetchPosts(), fetchCountdown()]).then(() => {
+        if (document.body.classList.contains('home')) {
+            displayPostGrid();
+            displayPostList();
+        } else if (document.body.classList.contains('post')) {
+            displayFullPost();
+        } else if (document.body.classList.contains('countdown')) {
+            initializeCountdown();
+        }
+    });
+
+    let blogPosts = [];
+    let countdownEndTime = null;
+
+    async function fetchPosts() {
+        try {
+            const response = await fetch('posts/posts.json');
+            blogPosts = await response.json();
+            // Sort posts by date (assuming date format is YYYY-MM-DD)
+            blogPosts.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            // Store the latest post ID for the countdown redirect
+            if (blogPosts.length > 0) {
+                localStorage.setItem('latestPostId', blogPosts[0].id);
+            }
+        } catch (error) {
+            console.error('Error fetching posts:', error);
+        }
+    }
+
+    async function fetchCountdown() {
+        try {
+            const response = await fetch('countdown.json');
+            const data = await response.json();
+            countdownEndTime = data.endTime;
+        } catch (error) {
+            console.error('Error fetching countdown:', error);
+        }
     }
 
     function initializeCountdown() {
         const countdownElement = document.getElementById('countdown-timer');
         const redirectButton = document.getElementById('redirect-button');
 
-        // Set the target date/time for the countdown (replace with your logic)
-        let countdownEndTime = localStorage.getItem('countdownEndTime');
-
-        if (!countdownEndTime || new Date(countdownEndTime) < new Date()) {
-            // Set new countdown end time 72 hours from now
-            countdownEndTime = new Date(new Date().getTime() + 72 * 60 * 60 * 1000).toISOString();
-            localStorage.setItem('countdownEndTime', countdownEndTime);
+        if (!countdownEndTime) {
+            countdownElement.textContent = "00:00:00";
+            return;
         }
 
         const countdownInterval = setInterval(() => {
@@ -25,10 +59,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 clearInterval(countdownInterval);
                 countdownElement.textContent = "00:00:00";
                 redirectButton.style.display = 'inline-block';
-
-                // Optionally, reset the countdown
-                // countdownEndTime = new Date(new Date().getTime() + 72 * 60 * 60 * 1000).toISOString();
-                // localStorage.setItem('countdownEndTime', countdownEndTime);
             } else {
                 const hours = Math.floor((distance / (1000 * 60 * 60)));
                 const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
