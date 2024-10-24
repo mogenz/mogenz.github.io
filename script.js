@@ -1,32 +1,59 @@
-// script.js
-
+// Countdown Timer for countdown.html
 document.addEventListener('DOMContentLoaded', function() {
-    // Function to display grid view of posts
-    function displayPostGrid() {
-        const gridContainer = document.getElementById('grid-container');
-        if (!gridContainer || typeof blogPosts === 'undefined') return;
-        blogPosts.forEach(post => {
-            const gridItem = document.createElement('div');
-            gridItem.className = 'grid-item';
-            gridItem.innerHTML = `
-                <h3><a href="post.html?postId=${post.id}">${post.title}</a></h3>
-                <p>${post.description}</p>
-            `;
-            gridContainer.appendChild(gridItem);
-        });
+    if (document.body.classList.contains('countdown')) {
+        initializeCountdown();
     }
 
-    // Function to display searchable post list
-    function displayPostList(posts = blogPosts) {
-        const postList = document.getElementById('post-list');
-        if (!postList) return;
-        postList.innerHTML = '';
-        posts.forEach(post => {
-            const listItem = document.createElement('li');
-            listItem.innerHTML = `<a href="post.html?postId=${post.id}">${post.title}</a>`;
-            postList.appendChild(listItem);
+    function initializeCountdown() {
+        const countdownElement = document.getElementById('countdown-timer');
+        const redirectButton = document.getElementById('redirect-button');
+
+        // Set the target date/time for the countdown (replace with your logic)
+        let countdownEndTime = localStorage.getItem('countdownEndTime');
+
+        if (!countdownEndTime || new Date(countdownEndTime) < new Date()) {
+            // Set new countdown end time 72 hours from now
+            countdownEndTime = new Date(new Date().getTime() + 72 * 60 * 60 * 1000).toISOString();
+            localStorage.setItem('countdownEndTime', countdownEndTime);
+        }
+
+        const countdownInterval = setInterval(() => {
+            const now = new Date().getTime();
+            const distance = new Date(countdownEndTime).getTime() - now;
+
+            if (distance < 0) {
+                clearInterval(countdownInterval);
+                countdownElement.textContent = "00:00:00";
+                redirectButton.style.display = 'inline-block';
+
+                // Optionally, reset the countdown
+                // countdownEndTime = new Date(new Date().getTime() + 72 * 60 * 60 * 1000).toISOString();
+                // localStorage.setItem('countdownEndTime', countdownEndTime);
+            } else {
+                const hours = Math.floor((distance / (1000 * 60 * 60)));
+                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                countdownElement.textContent = `
+                    ${String(hours).padStart(2, '0')}:
+                    ${String(minutes).padStart(2, '0')}:
+                    ${String(seconds).padStart(2, '0')}
+                `.replace(/\s/g, '');
+            }
+        }, 1000);
+
+        redirectButton.addEventListener('click', () => {
+            // Redirect to the latest blog post
+            const latestPostId = localStorage.getItem('latestPostId');
+            if (latestPostId) {
+                window.location.href = `post.html?postId=${latestPostId}`;
+            } else {
+                window.location.href = 'index.html';
+            }
         });
     }
+});
+
 
     // Search functionality
     const searchBar = document.getElementById('search-bar');
