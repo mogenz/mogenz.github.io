@@ -6,20 +6,41 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body class="all-posts">
-    <!-- Header -->
-    <header>
+    <body class="home">
+        <!-- Header -->
+        <header>
+            <h1 class="title"><a href="index.html">All Blog Posts</a></h1>
+            <nav class="menu">
+                <input type="checkbox" id="menu-toggle">
+                <label for="menu-toggle" class="menu-icon">&#9776;</label>
+                <div class="slideout-menu" id="slideout-menu">
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="countdown.html">Countdown</a></li>
+                        <li><a href="about.html">About</a></li>
+                    </ul>
+                </div>
+            </nav>
+        </header>
+
+            <!-- Hero Section -->
+    <section class="hero">
         <h1>All Blog Posts</h1>
-    </header>
+    </section>
 
-    <!-- Search Bar -->
-    <div class="search-container">
-        <input type="text" id="search-bar" placeholder="Search blog posts...">
-    </div>
-
-    <!-- Grid Container -->
-    <div id="grid-container" class="grid-container">
-        <!-- Blog posts will be dynamically inserted here -->
-    </div>
+    <section class="post-grid">
+        <div class="container">
+            <h2>Recent Posts</h2>
+            <input type="text" id="search-bar" placeholder="Search posts...">
+            <div class="grid-container" id="grid-container">
+                <!-- Grid items will be inserted here by script.js -->
+            </div>
+            <div style="text-align: center;">
+                <a href="all-posts.html">View all posts</a>
+            </div>
+        </div>
+    </section>
+    
 
     <!-- Back to Top Button -->
     <button id="back-to-top">Back to Top</button>
