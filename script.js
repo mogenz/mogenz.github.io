@@ -79,7 +79,7 @@ document.addEventListener('DOMContentLoaded', function() {
     fetchPosts().then(() => {
         if (document.body.classList.contains('home')) {
             // Display only the latest posts on the homepage
-            displayPostGrid(blogPosts.slice(0, 6));
+            displayPostGrid(blogPosts.slice(0, 8));
             displayPostList();
 
             // Search functionality for the homepage
