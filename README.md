@@ -27,4 +27,4 @@ a for fun test website :D
 
 
 
-this page is ran from the **dynamic** branch :P 
+this page is ran from the [Dynamic](https://github.com/mogenz/mogenz.github.io/tree/dynamic) branch :P 
