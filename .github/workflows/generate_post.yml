@@ -29,7 +29,7 @@ jobs:
       - name: Generate Blog Post
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-        run: node generate_post.cjs  
+        run: node generate_post.js  
 
       - name: Update Countdown Timer
         run: node update_countdown.js
