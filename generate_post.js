@@ -82,35 +82,45 @@ async function callOpenAIWithRetry(prompt, retries = 3) {
 }
 
 function parseGeneratedText(text) {
-    console.log("Raw generated text:", text); // Log the raw generated response
+    console.log("Raw generated text:", text); // Log the raw generated response for debugging
 
     const post = {};
     let currentSection = null;
     const lines = text.split('\n').filter(line => line.trim() !== '');
 
     lines.forEach(line => {
-        if (line.startsWith('**Title:**')) {
+        if (line.toLowerCase().startsWith('title:')) {
             currentSection = 'title';
-            post.title = line.replace('**Title:**', '').trim();
-        } else if (line.startsWith('**Description:**')) {
+            post.title = line.replace(/title:/i, '').trim();
+        } else if (line.toLowerCase().startsWith('description:')) {
             currentSection = 'description';
-            post.description = line.replace('**Description:**', '').trim();
-        } else if (line.startsWith('**Content:**')) {
+            post.description = line.replace(/description:/i, '').trim();
+        } else if (line.toLowerCase().startsWith('content:')) {
             currentSection = 'content';
-            post.content = line.replace('**Content:**', '').trim();
-        } else if (line.startsWith('**Date:**')) {
+            post.content = line.replace(/content:/i, '').trim();
+        } else if (line.toLowerCase().startsWith('date:')) {
             currentSection = 'date';
-            post.date = line.replace('**Date:**', '').trim();
+            post.date = line.replace(/date:/i, '').trim();
         } else if (currentSection) {
+            // Accumulate additional lines under the current section
             post[currentSection] = (post[currentSection] || '') + '\n' + line;
         }
     });
 
-    // Additional debug logging to confirm post sections
-    console.log("Parsed post:", post);
+    // Trim whitespace from each field if present
+    for (const key of ['title', 'description', 'content', 'date']) {
+        if (post[key]) post[key] = post[key].trim();
+    }
 
-    return post.title && post.description && post.content && post.date ? post : null;
+    // Final validation to ensure all required fields are present
+    if (!post.date) {
+        post.date = new Date().toISOString().split('T')[0]; // Default to today's date if missing
+    }
+
+    // Validate required fields
+    return post.title && post.description && post.content ? post : null;
 }
+
 
 
 
