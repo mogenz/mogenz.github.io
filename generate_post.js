@@ -1,11 +1,14 @@
+// generate_post.js
+
 import fs from 'fs';
 import path from 'path';
-import OpenAI from 'openai';
+import { Configuration, OpenAIApi } from 'openai';
 
 // Initialize OpenAI API
-const openai = new OpenAI({
+const configuration = new Configuration({
     apiKey: process.env.OPENAI_API_KEY,
 });
+const openai = new OpenAIApi(configuration);
 
 (async () => {
     try {
@@ -13,42 +16,52 @@ const openai = new OpenAI({
             throw new Error('OPENAI_API_KEY is not set. Please add it to your environment variables.');
         }
 
+        // Prepare the prompt
         const prompt = `
-You are an AI language model that writes insightful and engaging blog posts about anything you want. Generate a blog post with the following exact structure and headings (do not include any extra characters or formatting):
+You are an AI language model that writes insightful and engaging blog posts about anything you want. Generate a blog post with the following structure, using exact section headings as specified (do not include any additional formatting like '**', '*', '_', '#', '##', or any Markdown or HTML tags in the headings):
 
 Title:
-[Title here]
+[A catchy and descriptive title about a topic in AI.]
 
 Description:
-[Description here]
+[A short summary of the blog post.]
 
 Content:
-[Content here]
+[Detailed content of the blog post, including an introduction, unique insights, main sections, and conclusion. Use appropriate HTML tags like <h2>, <p>, <ul>, <li>, etc.]
 
 Date:
-[YYYY-MM-DD]
+[Provide a date in YYYY-MM-DD format.]
         `;
 
-        const response = await callOpenAIWithRetry(prompt);
+        // Generate the blog post using OpenAI's chat completion
+        const response = await openai.createChatCompletion({
+            model: "gpt-3.5-turbo", // Use "gpt-3.5-turbo" or "gpt-4" if you have access
+            messages: [{ role: "user", content: prompt }],
+            max_tokens: 1500,
+            temperature: 0.7,
+        });
 
-        // Log the full response structure to verify contents
-        console.log("Full Response Object:", JSON.stringify(response, null, 2));
-
-        if (!response || !response.choices || response.choices.length === 0) {
-            console.error("Unexpected API response structure. 'choices' is missing.");
+        if (!response.data.choices || response.data.choices.length === 0) {
             throw new Error('No response from OpenAI API.');
         }
 
-        const text = response.choices[0].message.content.trim();
-        const post = parseGeneratedText(text);
+        const text = response.data.choices[0].message.content.trim();
 
+        // Parse the generated text into a JSON object
+        const post = parseGeneratedText(text);
         console.log("Generated Response:\n", text);
 
         if (post) {
+            // Assign a unique ID to the post
             post.id = generateUniqueId();
+
+            // Save the post as a JSON file
             const filePath = path.join('posts', `post${post.id}.json`);
             fs.writeFileSync(filePath, JSON.stringify(post, null, 4));
-            await updatePostsJson(post);
+
+            // Update posts.json
+            updatePostsJson(post);
+
             console.log('New blog post generated successfully.');
         } else {
             throw new Error('Failed to parse the generated post.');
@@ -59,89 +72,55 @@ Date:
     }
 })();
 
-async function callOpenAIWithRetry(prompt, retries = 3) {
-    let attempts = 0;
-    while (attempts < retries) {
-        try {
-            const response = await openai.chat.completions.create({
-                model: "gpt-4o-mini",
-                messages: [{ role: "user", content: prompt }],
-                max_tokens: 1500,
-                temperature: 0.7,
-            });
-            return response;
-        } catch (error) {
-            attempts++;
-            console.error(`Attempt ${attempts} failed: ${error.message}`);
-            if (attempts >= retries) {
-                throw new Error("Max retries reached. Could not get a response from OpenAI.");
-            }
-            await new Promise(res => setTimeout(res, 2000));
-        }
-    }
-}
-
 function parseGeneratedText(text) {
-    console.log("Raw generated text:", text); // Log the raw generated response for debugging
-
+    const lines = text.split('\n').filter(line => line.trim() !== '');
     const post = {};
     let currentSection = null;
-    const lines = text.split('\n').filter(line => line.trim() !== '');
 
     lines.forEach(line => {
-        if (line.toLowerCase().startsWith('title:')) {
+        // Remove any leading formatting characters and whitespace
+        const cleanLine = line.replace(/^[\s#\*\_]+/, '').trim();
+
+        if (/^Title:/i.test(cleanLine)) {
             currentSection = 'title';
-            post.title = line.replace(/title:/i, '').trim();
-        } else if (line.toLowerCase().startsWith('description:')) {
+            post.title = cleanLine.replace(/^Title:/i, '').trim();
+        } else if (/^Description:/i.test(cleanLine)) {
             currentSection = 'description';
-            post.description = line.replace(/description:/i, '').trim();
-        } else if (line.toLowerCase().startsWith('content:')) {
+            post.description = cleanLine.replace(/^Description:/i, '').trim();
+        } else if (/^Content:/i.test(cleanLine)) {
             currentSection = 'content';
-            post.content = line.replace(/content:/i, '').trim();
-        } else if (line.toLowerCase().startsWith('date:')) {
+            post.content = cleanLine.replace(/^Content:/i, '').trim();
+        } else if (/^Date:/i.test(cleanLine)) {
             currentSection = 'date';
-            post.date = line.replace(/date:/i, '').trim();
+            post.date = cleanLine.replace(/^Date:/i, '').trim();
         } else if (currentSection) {
-            // Accumulate additional lines under the current section
-            post[currentSection] = (post[currentSection] || '') + '\n' + line;
+            // Append the line to the current section
+            post[currentSection] += '\n' + line.trim();
         }
     });
 
-    // Trim whitespace from each field if present
-    for (const key of ['title', 'description', 'content', 'date']) {
-        if (post[key]) post[key] = post[key].trim();
-    }
+    // Trim leading/trailing whitespace
+    ['title', 'description', 'content', 'date'].forEach(field => {
+        if (post[field]) {
+            post[field] = post[field].trim();
+        }
+    });
 
-    // Final validation to ensure all required fields are present
-    if (!post.date) {
-        post.date = new Date().toISOString().split('T')[0]; // Default to today's date if missing
+    // If the date is missing, set it to the current date
+    if (!post.date || post.date.trim() === '') {
+        const currentDate = new Date();
+        post.date = currentDate.toISOString().split('T')[0]; // Format as YYYY-MM-DD
     }
-
-    if (!post.title) {
-        console.error('Parsing Error: Title not found.');
-    }
-    if (!post.description) {
-        console.error('Parsing Error: Description not found.');
-    }
-    if (!post.content) {
-        console.error('Parsing Error: Content not found.');
-    }
-
-    return post.title && post.description && post.content ? post : null;
-}
 
     // Validate required fields
     return post.title && post.description && post.content ? post : null;
 }
 
-
-
-
 function generateUniqueId() {
     return Date.now().toString();
 }
 
-async function updatePostsJson(newPost) {
+function updatePostsJson(newPost) {
     const postsFilePath = path.join('posts', 'posts.json');
     let posts = [];
 
@@ -150,14 +129,18 @@ async function updatePostsJson(newPost) {
         posts = JSON.parse(existingPostsData);
     }
 
-    posts.push({
+    // Prepare metadata for posts.json
+    const postMeta = {
         id: newPost.id,
         title: newPost.title,
         description: newPost.description,
-        content: newPost.content,
         date: newPost.date,
-    });
+    };
 
+    posts.push(postMeta);
+
+    // Sort posts by date descending
     posts.sort((a, b) => new Date(b.date) - new Date(a.date));
+
     fs.writeFileSync(postsFilePath, JSON.stringify(posts, null, 4));
 }
