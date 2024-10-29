@@ -2,8 +2,11 @@ name: Generate New Blog Post
 
 on:
   schedule:
-    - cron: '0 0 */3 * *'
+    - cron: '0 0 */3 * *'  # Fallback to every 3 days
   workflow_dispatch:
+  push:
+    paths:
+      - 'countdown.json'  # Trigger when countdown.json is updated
 
 permissions:
   contents: write  # Grants write permission to push changes
