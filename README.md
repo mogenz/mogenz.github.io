@@ -62,5 +62,4 @@ no reason to :D
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
 ## Contact
-Feel free to connect with me on [LinkedIn](https://www.linkedin.com/in/gustaw--juul/) for more information or inquiries.
-```
+Feel free to connect with me on [LinkedIn](https://www.linkedin.com/in/gustaw-juul/) for more information or inquiries.
