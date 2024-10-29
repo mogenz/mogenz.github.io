@@ -18,24 +18,21 @@ const openai = new OpenAIApi(configuration);
 
         // Prepare the prompt
         const prompt = `
-You are an AI language model that writes insightful and engaging blog posts about anything you want. Generate a blog post with the following structure, using exact section headings as specified (do not include any additional formatting like '**', '*', '_', '#', '##', or any Markdown or HTML tags in the headings):
+You are an AI language model that writes insightful and engaging blog posts about any topic you choose. Generate a blog post in JSON format with the following structure:
 
-Title:
-[A catchy and descriptive title about a topic in AI.]
+{
+  "title": "A catchy and descriptive title about a topic in AI.",
+  "description": "A short summary of the blog post.",
+  "content": "Detailed content of the blog post, including an introduction, unique insights, main sections, and conclusion. Use HTML tags like <h2>, <p>, <ul>, <li> where appropriate.",
+  "date": "A date in YYYY-MM-DD format."
+}
 
-Description:
-[A short summary of the blog post.]
-
-Content:
-[Detailed content of the blog post, including an introduction, unique insights, main sections, and conclusion. Use appropriate HTML tags like <h2>, <p>, <ul>, <li>, etc.]
-
-Date:
-[Provide a date in YYYY-MM-DD format.]
+Ensure the JSON is properly formatted without any additional text or comments.
         `;
 
         // Generate the blog post using OpenAI's chat completion
         const response = await openai.createChatCompletion({
-            model: "gpt-4o-mini",
+            model: "gpt-3.5-turbo", // Use "gpt-3.5-turbo" or "gpt-4" if you have access
             messages: [{ role: "user", content: prompt }],
             max_tokens: 1500,
             temperature: 0.7,
@@ -47,8 +44,8 @@ Date:
 
         const text = response.data.choices[0].message.content.trim();
 
-        // Parse the generated text into a JSON object
-        const post = parseGeneratedText(text);
+        // Parse the generated JSON text into a JavaScript object
+        const post = parseGeneratedJSON(text);
         console.log("Generated Response:\n", text);
 
         if (post) {
@@ -64,7 +61,7 @@ Date:
 
             console.log('New blog post generated successfully.');
         } else {
-            throw new Error('Failed to parse the generated post.');
+            throw new Error('Failed to parse the generated post JSON.');
         }
     } catch (error) {
         console.error('Error generating blog post:', error.message);
@@ -72,48 +69,29 @@ Date:
     }
 })();
 
-function parseGeneratedText(text) {
-    const lines = text.split('\n').filter(line => line.trim() !== '');
-    const post = {};
-    let currentSection = null;
+function parseGeneratedJSON(text) {
+    try {
+        // Attempt to parse the text as JSON
+        const post = JSON.parse(text);
 
-    lines.forEach(line => {
-        // Remove any leading formatting characters and whitespace
-        const cleanLine = line.replace(/^[\s#\*\_]+/, '').trim();
-
-        if (/^Title:/i.test(cleanLine)) {
-            currentSection = 'title';
-            post.title = cleanLine.replace(/^Title:/i, '').trim();
-        } else if (/^Description:/i.test(cleanLine)) {
-            currentSection = 'description';
-            post.description = cleanLine.replace(/^Description:/i, '').trim();
-        } else if (/^Content:/i.test(cleanLine)) {
-            currentSection = 'content';
-            post.content = cleanLine.replace(/^Content:/i, '').trim();
-        } else if (/^Date:/i.test(cleanLine)) {
-            currentSection = 'date';
-            post.date = cleanLine.replace(/^Date:/i, '').trim();
-        } else if (currentSection) {
-            // Append the line to the current section
-            post[currentSection] += '\n' + line.trim();
+        // Validate required fields
+        if (!post.title || !post.description || !post.content) {
+            console.error('Parsing Error: Missing required fields.');
+            return null;
         }
-    });
 
-    // Trim leading/trailing whitespace
-    ['title', 'description', 'content', 'date'].forEach(field => {
-        if (post[field]) {
-            post[field] = post[field].trim();
+        // Ensure date is present and correctly formatted
+        if (!post.date || !/^\d{4}-\d{2}-\d{2}$/.test(post.date)) {
+            // Set date to current date if missing or invalid
+            const currentDate = new Date();
+            post.date = currentDate.toISOString().split('T')[0];
         }
-    });
 
-    // If the date is missing, set it to the current date
-    if (!post.date || post.date.trim() === '') {
-        const currentDate = new Date();
-        post.date = currentDate.toISOString().split('T')[0]; // Format as YYYY-MM-DD
+        return post;
+    } catch (error) {
+        console.error('Error parsing JSON:', error.message);
+        return null;
     }
-
-    // Validate required fields
-    return post.title && post.description && post.content ? post : null;
 }
 
 function generateUniqueId() {
