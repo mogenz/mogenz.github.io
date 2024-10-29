@@ -82,30 +82,37 @@ async function callOpenAIWithRetry(prompt, retries = 3) {
 }
 
 function parseGeneratedText(text) {
-    const lines = text.split('\n').filter(line => line.trim() !== '');
+    console.log("Raw generated text:", text); // Log the raw generated response
+
     const post = {};
     let currentSection = null;
+    const lines = text.split('\n').filter(line => line.trim() !== '');
 
     lines.forEach(line => {
-        if (line.startsWith('Title:')) {
+        if (line.startsWith('**Title:**')) {
             currentSection = 'title';
-            post.title = line.replace('Title:', '').trim();
-        } else if (line.startsWith('Description:')) {
+            post.title = line.replace('**Title:**', '').trim();
+        } else if (line.startsWith('**Description:**')) {
             currentSection = 'description';
-            post.description = line.replace('Description:', '').trim();
-        } else if (line.startsWith('Content:')) {
+            post.description = line.replace('**Description:**', '').trim();
+        } else if (line.startsWith('**Content:**')) {
             currentSection = 'content';
-            post.content = line.replace('Content:', '').trim();
-        } else if (line.startsWith('Date:')) {
+            post.content = line.replace('**Content:**', '').trim();
+        } else if (line.startsWith('**Date:**')) {
             currentSection = 'date';
-            post.date = line.replace('Date:', '').trim();
+            post.date = line.replace('**Date:**', '').trim();
         } else if (currentSection) {
-            post[currentSection] += '\n' + line;
+            post[currentSection] = (post[currentSection] || '') + '\n' + line;
         }
     });
 
-    return post.title && post.content ? post : null;
+    // Additional debug logging to confirm post sections
+    console.log("Parsed post:", post);
+
+    return post.title && post.description && post.content && post.date ? post : null;
 }
+
+
 
 function generateUniqueId() {
     return Date.now().toString();
