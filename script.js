@@ -147,62 +147,63 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Initialize the countdown
-    function initializeCountdown() {
+    async function initializeCountdown() {
         const countdownElement = document.getElementById('countdown-timer');
         const redirectButton = document.getElementById('redirect-button');
 
-        // Fixed start time (replace with your chosen start time in UTC)
-        const START_TIME = new Date('2023-10-01T00:00:00Z').getTime(); // Set your desired start time
-        const PERIOD = 72 * 60 * 60 * 1000; // 72 hours in milliseconds
+        try {
+            // Fetch the countdown end time from countdown.json
+            const response = await fetch('countdown.json');
+            const countdownData = await response.json();
+            const countdownEndTime = new Date(countdownData.endTime).getTime();
 
-        const now = Date.now();
-        const timeSinceStart = now - START_TIME;
-        const periodsSinceStart = Math.floor(timeSinceStart / PERIOD);
-        const countdownEndTime = START_TIME + (periodsSinceStart + 1) * PERIOD;
+            updateCountdown(); // Initial call to display the countdown immediately
 
-        updateCountdown(); // Initial call to display the countdown immediately
+            const countdownInterval = setInterval(updateCountdown, 1000);
 
-        const countdownInterval = setInterval(updateCountdown, 1000);
+            function updateCountdown() {
+                const now = Date.now();
+                const distance = countdownEndTime - now;
 
-        function updateCountdown() {
-            const now = Date.now();
-            const distance = countdownEndTime - now;
+                if (distance <= 0) {
+                    // Stop the countdown
+                    clearInterval(countdownInterval);
 
-            if (distance <= 0) {
-                // Reset countdown to the next period
-                clearInterval(countdownInterval);
-                initializeCountdown(); // Restart the countdown for the next period
+                    // Show the redirect button
+                    redirectButton.style.display = 'inline-block';
 
-                // Show the redirect button
-                redirectButton.style.display = 'inline-block';
+                    // Optionally, display a message or trigger an action here
+                    countdownElement.textContent = '00:00:00';
+                } else {
+                    // Hide the redirect button while the countdown is running
+                    redirectButton.style.display = 'none';
 
-                // Optionally, display a message or trigger an action here
-            } else {
-                // Hide the redirect button while the countdown is running
-                redirectButton.style.display = 'none';
+                    // Calculate time components
+                    const hours = Math.floor((distance / (1000 * 60 * 60)));
+                    const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                    const seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
-                // Calculate time components
-                const hours = Math.floor((distance / (1000 * 60 * 60)) % 72);
-                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
-                // Update the countdown display
-                countdownElement.textContent = `
-                    ${String(hours).padStart(2, '0')}:
-                    ${String(minutes).padStart(2, '0')}:
-                    ${String(seconds).padStart(2, '0')}
-                `.replace(/\s/g, '');
+                    // Update the countdown display
+                    countdownElement.textContent = `
+                        ${String(hours).padStart(2, '0')}:
+                        ${String(minutes).padStart(2, '0')}:
+                        ${String(seconds).padStart(2, '0')}
+                    `.replace(/\s/g, '');
+                }
             }
+
+            redirectButton.addEventListener('click', () => {
+                // Redirect to the latest blog post
+                const latestPostId = localStorage.getItem('latestPostId');
+                if (latestPostId) {
+                    window.location.href = `post.html?postId=${latestPostId}`;
+                } else {
+                    window.location.href = 'index.html';
+                }
+            });
+        } catch (error) {
+            console.error('Error fetching countdown data:', error);
+            countdownElement.textContent = 'Error loading countdown.';
         }
-
-        redirectButton.addEventListener('click', () => {
-            // Redirect to the latest blog post
-            const latestPostId = localStorage.getItem('latestPostId');
-            if (latestPostId) {
-                window.location.href = `post.html?postId=${latestPostId}`;
-            } else {
-                window.location.href = 'index.html';
-            }
-        });
     }
 });
