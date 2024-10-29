@@ -43,7 +43,6 @@ jobs:
           file_pattern: |
             posts/**
             countdown.json
-          pull_strategy: 'SIMPLE'  # Pull latest changes before pushing
 
 
   update-countdown:
