@@ -68,4 +68,4 @@ jobs:
           commit_message: "Reset countdown timer"
           branch: dynamic  # Specify the 'dynamic' branch
           file_pattern: |
-            countdown.jsonng
+            countdown.json
