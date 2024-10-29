@@ -153,7 +153,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         try {
             // Fetch the countdown end time from countdown.json
-            const response = await fetch('countdown.json');
+            const response = await fetch('countdown.json?v=' + new Date().getTime()); // Cache busting
             const countdownData = await response.json();
             const countdownEndTime = new Date(countdownData.endTime).getTime();
 
