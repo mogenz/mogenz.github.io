@@ -21,11 +21,60 @@ async function fetchCountdownData() {
     try {
         const response = await fetch('countdown.json');
         if (!response.ok) throw new Error('Failed to load countdown data');
-        
+
         const data = await response.json();
         initializeCountdown(new Date(data.endTime));
     } catch (error) {
         console.error('Error fetching countdown data:', error);
+    }
+}
+
+function initializeCountdown(endTime) {
+    const countdownElement = document.getElementById('countdown-timer');
+    const redirectButton = document.getElementById('redirect-button');
+
+    function updateCountdown() {
+        const now = new Date();
+        const distance = endTime - now;
+
+        if (distance <= 0) {
+            clearInterval(countdownInterval);
+            countdownElement.textContent = '00:00:00';
+            resetCountdown(); // Trigger reset when timer reaches zero
+        } else {
+            redirectButton.style.display = 'none';
+
+            const hours = Math.floor((distance / (1000 * 60 * 60)) % 72);
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            countdownElement.textContent = `
+                ${String(hours).padStart(2, '0')}:
+                ${String(minutes).padStart(2, '0')}:
+                ${String(seconds).padStart(2, '0')}
+            `.replace(/\s/g, '');
+        }
+    }
+
+    clearInterval(countdownInterval); // Clear any existing interval before starting a new one
+    updateCountdown(); // Initial call to display the countdown immediately
+    countdownInterval = setInterval(updateCountdown, 1000); // Update every second
+}
+
+async function resetCountdown() {
+    try {
+        const response = await fetch('/api/resetCountdown', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        });
+
+        if (!response.ok) throw new Error('Failed to reset countdown');
+        console.log('Countdown reset successfully');
+        
+        // Re-fetch the updated countdown data after reset
+        fetchCountdownData();
+    } catch (error) {
+        console.error('Error resetting countdown:', error);
     }
 }
 
@@ -79,61 +128,6 @@ function displayFullPost() {
     } else {
         document.getElementById('post-title').textContent = "Post Not Found";
         document.getElementById('post-content').textContent = "The blog post you are looking for does not exist.";
-    }
-}
-
-function initializeCountdown(endTime) {
-    const countdownElement = document.getElementById('countdown-timer');
-    const redirectButton = document.getElementById('redirect-button');
-
-    function updateCountdown() {
-        const now = new Date();
-        const distance = endTime - now;
-
-        if (distance <= 0) {
-            clearInterval(countdownInterval);
-            countdownElement.textContent = '00:00:00';
-            triggerNextCountdownCycle();
-        } else {
-            redirectButton.style.display = 'none';
-
-            const hours = Math.floor((distance / (1000 * 60 * 60)) % 72);
-            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
-            countdownElement.textContent = `
-                ${String(hours).padStart(2, '0')}:
-                ${String(minutes).padStart(2, '0')}:
-                ${String(seconds).padStart(2, '0')}
-            `.replace(/\s/g, '');
-        }
-    }
-
-    clearInterval(countdownInterval); // Clear any existing interval before starting a new one
-    updateCountdown(); // Initial call to display the countdown immediately
-    countdownInterval = setInterval(updateCountdown, 1000); // Update every second
-}
-
-async function triggerNextCountdownCycle() {
-    const newEndTime = new Date(Date.now() + 72 * 60 * 60 * 1000).toISOString();
-    await updateCountdownJson(newEndTime);
-    initializeCountdown(new Date(newEndTime));
-}
-
-async function updateCountdownJson(newEndTime) {
-    try {
-        const response = await fetch('/api/updateCountdown', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ endTime: newEndTime })
-        });
-
-        if (!response.ok) {
-            throw new Error('Failed to update countdown.json');
-        }
-        console.log('Countdown reset to:', newEndTime);
-    } catch (error) {
-        console.error('Error updating countdown.json:', error);
     }
 }
 
