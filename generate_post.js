@@ -35,7 +35,7 @@ Date:
 
         // Generate the blog post using OpenAI's chat completion
         const response = await openai.createChatCompletion({
-            model: "gpt-3.5-turbo", // Use "gpt-3.5-turbo" or "gpt-4" if you have access
+            model: "gpt-4o-mini",
             messages: [{ role: "user", content: prompt }],
             max_tokens: 1500,
             temperature: 0.7,
