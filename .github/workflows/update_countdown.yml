@@ -1,0 +1,32 @@
+name: Update Countdown Timer
+
+on:
+  workflow_dispatch:  # Allows manual triggering of the workflow
+
+permissions:
+  contents: write  # Grants write permission to push changes
+
+jobs:
+  update-countdown:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout 'dynamic' branch
+        uses: actions/checkout@v3
+        with:
+          ref: dynamic  # Checkout the 'dynamic' branch
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      - name: Update Countdown Timer
+        run: node update_countdown.js
+
+      - name: Commit and Push Changes to 'dynamic' branch
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: "Reset countdown timer [skip ci]"
+          branch: dynamic  # Specify the 'dynamic' branch
+          file_pattern: |
+            countdown.json
