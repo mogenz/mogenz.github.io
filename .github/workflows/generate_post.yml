@@ -31,13 +31,13 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: node generate_post.js  
 
-      - name: Rerun Script.js
-        run: node script.js  # Run script.js after generate_post.js
+      - name: Update Countdown
+        run: node update_countdown.js 
 
       - name: Commit and Push Changes to 'dynamic' branch
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
-          commit_message: "Add new blog post [skip ci]"
+          commit_message: "Added new blog post"
           branch: dynamic  # Specify the 'dynamic' branch
           file_pattern: |
             posts/**
