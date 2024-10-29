@@ -40,6 +40,7 @@ jobs:
             posts/**
 
   update-countdown:
+    needs: generate-post  # This makes update-countdown wait for generate-post to complete
     runs-on: ubuntu-latest
     steps:
       - name: Checkout 'dynamic' branch
