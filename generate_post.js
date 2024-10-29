@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { OpenAI } from 'openai';
+import OpenAI from 'openai';
 
 // Initialize OpenAI API
 const openai = new OpenAI({
@@ -13,9 +13,8 @@ const openai = new OpenAI({
             throw new Error('OPENAI_API_KEY is not set. Please add it to your environment variables.');
         }
 
-        // Prepare the prompt
         const prompt = `
-You are an AI language model that writes insightful and engaging blog posts about anything you want. Generate a blog post with the following structure including a date at the end:
+You are an AI language model that writes insightful and engaging blog posts about random topics. Generate a blog post with the following structure including a date at the end:
 
 Title:
 [A catchy and descriptive title about a topic in AI.]
@@ -24,42 +23,32 @@ Description:
 [A short summary of the blog post.]
 
 Content:
-[Detailed content of the blog post, including an introduction, main sections, and conclusion. Use appropriate HTML tags like <h2>, <p>, <ul>, <li>, etc.]
+[Detailed content of the blog post, including an introduction, unique insights, main sections, and conclusion. Use appropriate HTML tags like <h2>, <p>, <ul>, <li>, etc.]
 
 Date:
-[Make up a date random date and write in YYYY-MM-DD format]
+[Provide a random date in YYYY-MM-DD format]
         `;
 
-        // Generate the blog post using OpenAI's chat completion
-        const chatCompletion = await openai.chat.completions.create({
-            messages: [{ role: "system", content: prompt }],
-            model: "gpt-4o-mini", 
-            max_tokens: 1500,
-            temperature: 0.7,
-        });
+        const response = await callOpenAIWithRetry(prompt);
 
-        if (!chatCompletion.choices || chatCompletion.choices.length === 0) {
+        // Log the full response structure to verify contents
+        console.log("Full Response Object:", JSON.stringify(response, null, 2));
+
+        if (!response || !response.choices || response.choices.length === 0) {
+            console.error("Unexpected API response structure. 'choices' is missing.");
             throw new Error('No response from OpenAI API.');
         }
 
-        const text = chatCompletion.choices[0].message.content.trim();
-
-        // Parse the generated text into a JSON object
+        const text = response.choices[0].message.content.trim();
         const post = parseGeneratedText(text);
+
         console.log("Generated Response:\n", text);
 
-
         if (post) {
-            // Assign a unique ID to the post
             post.id = generateUniqueId();
-
-            // Save the post as a JSON file
             const filePath = path.join('posts', `post${post.id}.json`);
             fs.writeFileSync(filePath, JSON.stringify(post, null, 4));
-
-            // Update posts.json
-            updatePostsJson(post);
-
+            await updatePostsJson(post);
             console.log('New blog post generated successfully.');
         } else {
             throw new Error('Failed to parse the generated post.');
@@ -70,6 +59,28 @@ Date:
     }
 })();
 
+async function callOpenAIWithRetry(prompt, retries = 3) {
+    let attempts = 0;
+    while (attempts < retries) {
+        try {
+            const response = await openai.chat.completions.create({
+                model: "gpt-4o-mini",
+                messages: [{ role: "user", content: prompt }],
+                max_tokens: 1500,
+                temperature: 0.7,
+            });
+            return response;
+        } catch (error) {
+            attempts++;
+            console.error(`Attempt ${attempts} failed: ${error.message}`);
+            if (attempts >= retries) {
+                throw new Error("Max retries reached. Could not get a response from OpenAI.");
+            }
+            await new Promise(res => setTimeout(res, 2000));
+        }
+    }
+}
+
 function parseGeneratedText(text) {
     const lines = text.split('\n').filter(line => line.trim() !== '');
     const post = {};
@@ -78,56 +89,29 @@ function parseGeneratedText(text) {
     lines.forEach(line => {
         if (line.startsWith('Title:')) {
             currentSection = 'title';
-            let content = line.replace('Title:', '').trim();
-            post.title = content || '';
+            post.title = line.replace('Title:', '').trim();
         } else if (line.startsWith('Description:')) {
             currentSection = 'description';
-            let content = line.replace('Description:', '').trim();
-            post.description = content || '';
+            post.description = line.replace('Description:', '').trim();
         } else if (line.startsWith('Content:')) {
             currentSection = 'content';
-            let content = line.replace('Content:', '').trim();
-            post.content = content || '';
+            post.content = line.replace('Content:', '').trim();
         } else if (line.startsWith('Date:')) {
             currentSection = 'date';
-            let content = line.replace('Date:', '').trim();
-            post.date = content || '';
-        } else {
-            // Append the line to the current section
-            if (currentSection) {
-                if (currentSection === 'title' || currentSection === 'description' || currentSection === 'date') {
-                    post[currentSection] += ' ' + line.trim();
-                } else if (currentSection === 'content') {
-                    post[currentSection] += '\n' + line;
-                }
-            }
+            post.date = line.replace('Date:', '').trim();
+        } else if (currentSection) {
+            post[currentSection] += '\n' + line;
         }
     });
-
-    // Trim leading/trailing whitespace
-    ['title', 'description', 'content', 'date'].forEach(field => {
-        if (post[field]) {
-            post[field] = post[field].trim();
-        }
-    });
-
-    // If the date is missing, set it to the current date
-    if (!post.date || post.date.trim() === '') {
-        const currentDate = new Date();
-        post.date = currentDate.toISOString().split('T')[0]; // Format as YYYY-MM-DD
-    }
 
     return post.title && post.content ? post : null;
 }
-
-
-
 
 function generateUniqueId() {
     return Date.now().toString();
 }
 
-function updatePostsJson(newPost) {
+async function updatePostsJson(newPost) {
     const postsFilePath = path.join('posts', 'posts.json');
     let posts = [];
 
@@ -136,10 +120,14 @@ function updatePostsJson(newPost) {
         posts = JSON.parse(existingPostsData);
     }
 
-    posts.push(newPost);
+    posts.push({
+        id: newPost.id,
+        title: newPost.title,
+        description: newPost.description,
+        content: newPost.content,
+        date: newPost.date,
+    });
 
-    // Sort posts by date descending
     posts.sort((a, b) => new Date(b.date) - new Date(a.date));
-
     fs.writeFileSync(postsFilePath, JSON.stringify(posts, null, 4));
 }
