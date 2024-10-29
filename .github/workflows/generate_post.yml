@@ -15,7 +15,8 @@ jobs:
       - name: Checkout 'dynamic' branch
         uses: actions/checkout@v3
         with:
-          ref: dynamic  # Checkout the 'dynamic' branch
+          ref: dynamic
+          fetch-depth: 0  # Fetch all history to avoid push conflicts
 
       - name: Set up Node.js
         uses: actions/setup-node@v3
@@ -37,8 +38,9 @@ jobs:
       - name: Commit and Push Changes to 'dynamic' branch
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
-          commit_message: "Added new blog post and reset countdown"
-          branch: dynamic  # Specify the 'dynamic' branch
+          commit_message: "Added new blog post and reset countdown [skip ci]"
+          branch: dynamic
           file_pattern: |
             posts/**
             countdown.json
+          pull_strategy: 'SIMPLE'  # Pull latest changes before pushing
