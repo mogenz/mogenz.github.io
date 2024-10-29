@@ -14,19 +14,19 @@ const openai = new OpenAI({
         }
 
         const prompt = `
-You are an AI language model that writes insightful and engaging blog posts about random topics. Generate a blog post with the following structure including a date at the end:
+You are an AI language model that writes insightful and engaging blog posts about anything you want. Generate a blog post with the following exact structure and headings (do not include any extra characters or formatting):
 
 Title:
-[A catchy and descriptive title about a topic in AI.]
+[Title here]
 
 Description:
-[A short summary of the blog post.]
+[Description here]
 
 Content:
-[Detailed content of the blog post, including an introduction, unique insights, main sections, and conclusion. Use appropriate HTML tags like <h2>, <p>, <ul>, <li>, etc.]
+[Content here]
 
 Date:
-[Provide a random date in YYYY-MM-DD format]
+[YYYY-MM-DD]
         `;
 
         const response = await callOpenAIWithRetry(prompt);
@@ -116,6 +116,19 @@ function parseGeneratedText(text) {
     if (!post.date) {
         post.date = new Date().toISOString().split('T')[0]; // Default to today's date if missing
     }
+
+    if (!post.title) {
+        console.error('Parsing Error: Title not found.');
+    }
+    if (!post.description) {
+        console.error('Parsing Error: Description not found.');
+    }
+    if (!post.content) {
+        console.error('Parsing Error: Content not found.');
+    }
+
+    return post.title && post.description && post.content ? post : null;
+}
 
     // Validate required fields
     return post.title && post.description && post.content ? post : null;
