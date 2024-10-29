@@ -1,15 +1,14 @@
 // script.js
 
 let blogPosts = [];
+let countdownInterval; // Declare countdownInterval at the top level
 
 async function fetchPosts() {
     try {
         const response = await fetch('posts/posts.json');
         blogPosts = await response.json();
-        // Sort posts by date (assuming date format is YYYY-MM-DD)
         blogPosts.sort((a, b) => new Date(b.date) - new Date(a.date));
 
-        // Store the latest post ID for the countdown redirect
         if (blogPosts.length > 0) {
             localStorage.setItem('latestPostId', blogPosts[0].id);
         }
@@ -34,12 +33,10 @@ function displayPostGrid(postsToDisplay = []) {
     const gridContainer = document.getElementById('grid-container');
     if (!gridContainer) return;
 
-    // If no specific posts are provided, display all posts
     if (postsToDisplay.length === 0) {
         postsToDisplay = blogPosts;
     }
 
-    // Clear existing content
     gridContainer.innerHTML = '';
 
     postsToDisplay.forEach(post => {
@@ -57,7 +54,6 @@ function displayPostList(posts = blogPosts) {
     const postList = document.getElementById('post-list');
     if (!postList) return;
 
-    // Clear existing content
     postList.innerHTML = '';
 
     posts.forEach(post => {
@@ -113,8 +109,9 @@ function initializeCountdown(endTime) {
         }
     }
 
+    clearInterval(countdownInterval); // Clear any existing interval before starting a new one
     updateCountdown(); // Initial call to display the countdown immediately
-    const countdownInterval = setInterval(updateCountdown, 1000); // Update every second
+    countdownInterval = setInterval(updateCountdown, 1000); // Update every second
 }
 
 async function triggerNextCountdownCycle() {
