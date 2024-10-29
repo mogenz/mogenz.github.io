@@ -95,10 +95,9 @@ function initializeCountdown(endTime) {
         const distance = endTime - now;
 
         if (distance <= 0) {
-            // Countdown finished, show the redirect button
             clearInterval(countdownInterval);
             countdownElement.textContent = '00:00:00';
-            redirectButton.style.display = 'inline-block';
+            triggerNextCountdownCycle();
         } else {
             redirectButton.style.display = 'none';
 
@@ -116,27 +115,37 @@ function initializeCountdown(endTime) {
 
     updateCountdown(); // Initial call to display the countdown immediately
     const countdownInterval = setInterval(updateCountdown, 1000); // Update every second
+}
 
-    redirectButton.addEventListener('click', () => {
-        // Redirect to the latest blog post
-        const latestPostId = localStorage.getItem('latestPostId');
-        if (latestPostId) {
-            window.location.href = `post.html?postId=${latestPostId}`;
-        } else {
-            window.location.href = 'index.html';
+async function triggerNextCountdownCycle() {
+    const newEndTime = new Date(Date.now() + 72 * 60 * 60 * 1000).toISOString();
+    await updateCountdownJson(newEndTime);
+    initializeCountdown(new Date(newEndTime));
+}
+
+async function updateCountdownJson(newEndTime) {
+    try {
+        const response = await fetch('/api/updateCountdown', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ endTime: newEndTime })
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to update countdown.json');
         }
-    });
+        console.log('Countdown reset to:', newEndTime);
+    } catch (error) {
+        console.error('Error updating countdown.json:', error);
+    }
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Fetch posts and countdown data, then initialize the page
     fetchPosts().then(() => {
         if (document.body.classList.contains('home')) {
-            // Display only the latest posts on the homepage
             displayPostGrid(blogPosts.slice(0, 8));
             displayPostList();
 
-            // Search functionality for the homepage
             const searchBar = document.getElementById('search-bar');
             if (searchBar) {
                 searchBar.addEventListener('input', function(e) {
@@ -146,10 +155,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
             }
         } else if (document.body.classList.contains('all-posts')) {
-            // Display all posts on the All Posts page
             displayPostGrid();
 
-            // Search functionality for the All Posts page
             const searchBar = document.getElementById('search-bar');
             if (searchBar) {
                 searchBar.addEventListener('input', function(e) {
