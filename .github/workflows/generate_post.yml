@@ -2,11 +2,8 @@ name: Generate New Blog Post
 
 on:
   schedule:
-    - cron: '0 0 */3 * *'  # Fallback to every 3 days
+    - cron: '0 0 */3 * *'  # Every 3 days at 00:00 UTC
   workflow_dispatch:
-  push:
-    paths:
-      - 'countdown.json'  # Trigger when countdown.json is updated
 
 permissions:
   contents: write  # Grants write permission to push changes
@@ -34,14 +31,10 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: node generate_post.js  
 
-      - name: Update Countdown Timer
-        run: node update_countdown.js
-
       - name: Commit and Push Changes to 'dynamic' branch
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
-          commit_message: "Add new blog post and reset countdown [skip ci]"
+          commit_message: "Add new blog post [skip ci]"
           branch: dynamic  # Specify the 'dynamic' branch
           file_pattern: |
             posts/**
-            countdown.json
