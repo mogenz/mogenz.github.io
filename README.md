@@ -27,4 +27,4 @@ a for fun test website :D
 
 
 
-this is run from the 'dynamic' branch :P 
+this page is ran from the **dynamic** branch :P 
