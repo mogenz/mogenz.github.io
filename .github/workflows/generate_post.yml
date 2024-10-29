@@ -37,7 +37,8 @@ jobs:
       - name: Commit and Push Changes to 'dynamic' branch
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
-          commit_message: "Added new blog post"
+          commit_message: "Added new blog post and reset countdown"
           branch: dynamic  # Specify the 'dynamic' branch
           file_pattern: |
             posts/**
+            countdown.json
