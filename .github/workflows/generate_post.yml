@@ -1,0 +1,65 @@
+name: Generate New Blog Post
+
+on:
+  schedule:
+    - cron: '0 0 */3 * *'  # Every 3 days at 00:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write  # Grants write permission to push changes
+
+jobs:
+  generate-post:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout 'dynamic' branch
+        uses: actions/checkout@v3
+        with:
+          ref: dynamic  # Checkout the 'dynamic' branch
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      - name: Install Dependencies
+        run: |
+          npm install
+
+      - name: Generate Blog Post
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: node generate_post.js  
+
+      - name: Commit and Push Changes to 'dynamic' branch
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: "Added new blog post"
+          branch: dynamic  # Specify the 'dynamic' branch
+          file_pattern: |
+            posts/**
+
+  update-countdown:
+    needs: generate-post  # This makes update-countdown wait for generate-post to complete
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout 'dynamic' branch
+        uses: actions/checkout@v3
+        with:
+          ref: dynamic  # Checkout the 'dynamic' branch
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      - name: Update Countdown Timer
+        run: node update_countdown.js
+
+      - name: Commit and Push Changes to 'dynamic' branch
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: "Reset countdown timer"
+          branch: dynamic  # Specify the 'dynamic' branch
+          file_pattern: |
+            countdown.json
